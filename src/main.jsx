@@ -6,14 +6,21 @@ import "./css/style.css";
 import "./css/satoshi.css";
 import { AuthProvider } from "./context/AuthContext";
 import { Toaster } from "react-hot-toast";
+import { Provider } from "react-redux";
+import store, { persistor } from "./app/store";
+import { PersistGate } from "redux-persist/integration/react";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <Toaster position="top-right" reverseOrder={false}/>
-        <App />
-      </AuthProvider>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <AuthProvider>
+            <Toaster position="top-right" reverseOrder={false} />
+            <App />
+          </AuthProvider>
+        </PersistGate>
+      </Provider>
     </BrowserRouter>
     ,
   </React.StrictMode>

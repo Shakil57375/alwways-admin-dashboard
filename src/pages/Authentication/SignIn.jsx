@@ -1,60 +1,31 @@
-import React, { useState, useContext, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { AuthContext } from "../../context/AuthContext";
-import login_image from "../../images/login/login_page_logo.png";
 import { IoEyeOffOutline } from "react-icons/io5";
 import { FaRegEye } from "react-icons/fa";
+import login_image from "../../images/login/login_page_logo.png";
+import { useLoginMutation } from "../../features/auth/authApi";
+
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { login, auth } = useContext(AuthContext);
 
-  // redirect if token exists
-  useEffect(() => {
-    if (auth.token) {
-      return navigate("/"); // Redirect to dashboard if token exists
-    }
-  }, [auth]);
+  const [login, { isLoading, error: loginError }] = useLoginMutation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const response = await axios.post(
-        "http://localhost:5001/api/user/admin/login",
-        {
-          email,
-          password,
-        }
-      );
+      const result = await login({
+        email,
+        password,
+      }).unwrap();
 
-      console.log(response.data);
-      const {
-        _id,
-        firstname,
-        lastname,
-        profilePicture,
-        email: userEmail,
-        role,
-        token,
-      } = response.data;
-
-      // Save user data in context and localStorage
-      login({
-        id: _id,
-        firstname,
-        lastname,
-        profilePicture,
-        email: userEmail,
-        role,
-        token,
-      });
-      navigate("/"); // Redirect to dashboard
+      // Redirect to dashboard on successful login
+      navigate("/");
     } catch (err) {
-      setError("Invalid credentials. Please try again.");
+      console.error("Login failed:", err);
     }
   };
 
@@ -64,21 +35,25 @@ const SignIn = () => {
         {/* Logo Section */}
         <div className="flex-1 flex flex-col items-center justify-center mb-8 md:mb-0">
           <img
-            src={login_image}
+            src={login_image || "/placeholder.svg"}
             alt="Logo"
             className="w-[483px] h-[280px] mb-4"
           />
         </div>
 
         {/* Login Form Section */}
-        <div className="flex-1 w-full max-w-md ">
-          <h2 className="text-5xl font-medium mb-4 text-#364636 text-center">
+        <div className="flex-1 w-full max-w-md">
+          <h2 className="text-5xl font-medium mb-4 text-[#364636] text-center">
             Login To Account
           </h2>
           <p className="text-[#364636] mb-6 text-sm font-medium text-center">
             Please enter your email and password to continue
           </p>
-          {error && <p className="text-red-500 mb-2">{error}</p>}
+          {loginError && (
+            <p className="text-red-500 mb-2">
+              {loginError?.data?.message || "Login failed. Please try again."}
+            </p>
+          )}
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Email Input */}
@@ -136,7 +111,7 @@ const SignIn = () => {
                 <span className="ml-2 text-gray-700">Remember Password</span>
               </label>
               <Link
-                to={"/auth/forgetPassword"}
+                to="/auth/forgetPassword"
                 className="text-red-500 hover:underline"
               >
                 Forgot Password?
@@ -146,9 +121,10 @@ const SignIn = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-[430px] h-12 py-4 px-8 bg-[#8CAB91] text-[#FAF1E6] hover:text-white rounded-3xl text-base flex items-center justify-center hover:scale-105 duration-200"
+              disabled={isLoading}
+              className="w-[430px] h-12 py-4 px-8 bg-[#8CAB91] text-[#FAF1E6] hover:text-white rounded-3xl text-base flex items-center justify-center hover:scale-105 duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {isLoading ? "Signing In..." : "Sign In"}
             </button>
           </form>
         </div>

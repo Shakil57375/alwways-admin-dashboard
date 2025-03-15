@@ -3,12 +3,14 @@ import { Outlet } from "react-router-dom";
 import Header from "../components/Header/index.jsx";
 import Sidebar from "../components/Sidebar/index.jsx";
 import { AuthContext } from "../context/AuthContext.jsx";
+import { useSelector } from "react-redux";
+import { selectAccessToken } from "../features/auth/authSlice.js";
 
 const DefaultLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { auth } = useContext(AuthContext);
+  const token = useSelector(selectAccessToken)
 
-  if (!auth?.token) {
+  if (!token) {
     return null; // Render nothing if the user is not authenticated
   }
 

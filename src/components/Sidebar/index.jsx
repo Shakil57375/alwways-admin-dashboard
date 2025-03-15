@@ -1,77 +1,131 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import SidebarLinkGroup from "./SidebarLinkGroup.jsx";
-import Logo from "../../images/logo/logo.png";
-import { FiShoppingBag } from "react-icons/fi";
-import { GoChecklist } from "react-icons/go";
-import { MdDashboard } from "react-icons/md";
-import { TiUserAddOutline } from "react-icons/ti";
-import { ImPower } from "react-icons/im";
-import { IoIosLogOut, IoMdSettings } from "react-icons/io";
-import { BiLogOut } from "react-icons/bi";
-import { AuthContext } from "../../context/AuthContext.jsx";
+import { useEffect, useRef, useState } from "react"
+import { NavLink, useLocation } from "react-router-dom"
+import { FiShoppingBag } from "react-icons/fi"
+import { GoChecklist } from "react-icons/go"
+import { MdDashboard } from "react-icons/md"
+import { TiUserAddOutline } from "react-icons/ti"
+import { ImPower } from "react-icons/im"
+import { IoMdSettings } from "react-icons/io"
+import { BiLogOut } from "react-icons/bi"
+
+// SidebarLinkGroup component for dropdown menus
+const SidebarLinkGroup = ({ children, activeCondition }) => {
+  const [open, setOpen] = useState(activeCondition)
+
+  const handleClick = () => {
+    setOpen(!open)
+  }
+
+  return <li>{children(handleClick, open)}</li>
+}
+
+// NavItem component to reduce repetition
+const NavItem = ({ to, icon: Icon, children }) => {
+  return (
+    <li>
+      <NavLink
+        to={to}
+        className={({ isActive }) =>
+          `group relative flex items-center gap-2.5 rounded-sm py-2 px-8 font-medium text-[#364636] duration-300 ease-in-out ${
+            isActive
+              ? "bg-[#8CAB91] !text-white before:content-[''] before:absolute before:top-0 before:left-2 before:h-full before:w-3 before:bg-[#FAF1E6]"
+              : "hover:bg-[#8CAB91] hover:text-white"
+          }`
+        }
+      >
+        <Icon className="text-2xl" />
+        {children}
+      </NavLink>
+    </li>
+  )
+}
+
+// DropdownItem component for dropdown menu items
+const DropdownItem = ({ to, children }) => {
+  return (
+    <li>
+      <NavLink
+        to={to}
+        className={({ isActive }) =>
+          "group relative flex items-center gap-2.5 hover:!bg-[#8CAB91] hover:!text-white px-16 py-2 font-medium text-[#364636] duration-300 ease-in-out " +
+          (isActive &&
+            "!bg-[#8CAB91] !text-white before:content-[''] before:absolute before:top-0 before:left-2 before:h-full before:w-3 before:bg-[#FAF1E6]")
+        }
+      >
+        {children}
+      </NavLink>
+    </li>
+  )
+}
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
-  const location = useLocation();
-  const { pathname } = location;
+  const location = useLocation()
+  const { pathname } = location
 
-  const trigger = useRef(null);
-  const sidebar = useRef(null);
+  const trigger = useRef(null)
+  const sidebar = useRef(null)
 
-  const { logout } = useContext(AuthContext);
+  // For logout functionality - replace with your actual auth context
+  const logout = () => {
+    console.log("Logging out...")
+    // Add your actual logout logic here
+  }
 
-  const storedSidebarExpanded = localStorage.getItem("sidebar-expanded");
+  const storedSidebarExpanded = localStorage.getItem("sidebar-expanded")
   const [sidebarExpanded, setSidebarExpanded] = useState(
-    storedSidebarExpanded === null ? false : storedSidebarExpanded === "true"
-  );
+    storedSidebarExpanded === null ? false : storedSidebarExpanded === "true",
+  )
 
   // Close sidebar on click outside
   useEffect(() => {
     const clickHandler = ({ target }) => {
-      if (!sidebar.current || !trigger.current) return;
-      if (
-        !sidebarOpen ||
-        sidebar.current.contains(target) ||
-        trigger.current.contains(target)
-      )
-        return;
-      setSidebarOpen(false);
-    };
-    document.addEventListener("click", clickHandler);
-    return () => document.removeEventListener("click", clickHandler);
-  });
+      if (!sidebar.current || !trigger.current) return
+      if (!sidebarOpen || sidebar.current.contains(target) || trigger.current.contains(target)) return
+      setSidebarOpen(false)
+    }
+    document.addEventListener("click", clickHandler)
+    return () => document.removeEventListener("click", clickHandler)
+  })
 
   // Close sidebar if the Esc key is pressed
   useEffect(() => {
     const keyHandler = ({ keyCode }) => {
-      if (!sidebarOpen || keyCode !== 27) return;
-      setSidebarOpen(false);
-    };
-    document.addEventListener("keydown", keyHandler);
-    return () => document.removeEventListener("keydown", keyHandler);
-  });
+      if (!sidebarOpen || keyCode !== 27) return
+      setSidebarOpen(false)
+    }
+    document.addEventListener("keydown", keyHandler)
+    return () => document.removeEventListener("keydown", keyHandler)
+  })
 
   // Save expanded state to localStorage
   useEffect(() => {
-    localStorage.setItem("sidebar-expanded", sidebarExpanded.toString());
+    localStorage.setItem("sidebar-expanded", sidebarExpanded.toString())
     if (sidebarExpanded) {
-      document.querySelector("body")?.classList.add("sidebar-expanded");
+      document.querySelector("body")?.classList.add("sidebar-expanded")
     } else {
-      document.querySelector("body")?.classList.remove("sidebar-expanded");
+      document.querySelector("body")?.classList.remove("sidebar-expanded")
     }
-  }, [sidebarExpanded]);
+  }, [sidebarExpanded])
+
+  // Navigation items data
+  const navItems = [
+    { to: "/", icon: MdDashboard, label: "Dashboard" },
+    { to: "/orderManagement", icon: FiShoppingBag, label: "Order Management" },
+    { to: "/addQuestionnaire", icon: GoChecklist, label: "Add Questionnaire" },
+    { to: "/makeAdmin", icon: TiUserAddOutline, label: "Make Admin" },
+  ]
 
   return (
     <aside
       ref={sidebar}
-      className={`relative left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-[#FAF1E6] duration-300 ease-linear  lg:static lg:translate-x-0 ${
+      className={`relative left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-[#FAF1E6] duration-300 ease-linear lg:static lg:translate-x-0 ${
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
       {/* Sidebar Header */}
       <div className="flex items-center justify-between gap-2 px-6 py-1.5 lg:py-1.5">
         <NavLink to="/">
-          <img src={Logo} alt="Logo" />
+          <img src="/logo.png" alt="Logo" />
         </NavLink>
         <button
           ref={trigger}
@@ -95,99 +149,34 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </svg>
         </button>
       </div>
-      {/* Sidebar Header */}
 
-      <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear ">
+      <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
         {/* Sidebar Menu */}
-        <nav className="mt-5 py-4 lg:mt-3 ">
-          <ul className="mb-6 flex flex-col gap-1.5 ">
-            {/* Dashboard */}
-            <li>
-              <NavLink
-                to="/"
-                className={({ isActive }) =>
-                  `group relative flex items-center gap-2.5 rounded-sm py-2 px-8 font-medium text-[#364636] duration-300 ease-in-out ${
-                    isActive
-                      ? "bg-[#8CAB91] !text-white before:content-[''] before:absolute before:top-0 before:left-2 before:h-full before:w-3 before:bg-[#FAF1E6]"
-                      : "hover:bg-[#8CAB91] hover:text-white"
-                  }`
-                }
-              >
-                <MdDashboard className="text-2xl" />
-                Dashboard
-              </NavLink>
-            </li>
-            {/* Calendar */}
-            <li>
-              <NavLink
-                to="/orderManagement"
-                className={({ isActive }) =>
-                  `group relative flex items-center gap-2.5 rounded-sm py-2 px-8 font-medium text-[#364636] duration-300 ease-in-out ${
-                    isActive
-                      ? "bg-[#8CAB91] !text-white before:content-[''] before:absolute before:top-0 before:left-2 before:h-full before:w-3 before:bg-[#FAF1E6]"
-                      : "hover:bg-[#8CAB91] hover:text-white"
-                  }`
-                }
-              >
-                <FiShoppingBag className="text-2xl" />
-                Order Management
-              </NavLink>
-            </li>
-            {/* Profile */}
-            <li>
-              <NavLink
-                to="/addQuestionnaire"
-                className={({ isActive }) =>
-                  `group relative flex items-center gap-2.5 rounded-sm py-2 px-8 font-medium text-[#364636] duration-300 ease-in-out ${
-                    isActive
-                      ? "bg-[#8CAB91] !text-white before:content-[''] before:absolute before:top-0 before:left-2 before:h-full before:w-3 before:bg-[#FAF1E6]"
-                      : "hover:bg-[#8CAB91] hover:text-white"
-                  }`
-                }
-              >
-                <GoChecklist className="text-2xl" />
-                Add Questionnaire
-              </NavLink>
-            </li>
-            {/* Tables */}
-            <li>
-              <NavLink
-                to="/makeAdmin"
-                className={({ isActive }) =>
-                  `group relative flex items-center gap-2.5 rounded-sm py-2 px-8 font-medium text-[#364636] duration-300 ease-in-out ${
-                    isActive
-                      ? "bg-[#8CAB91] !text-white before:content-[''] before:absolute before:top-0 before:left-2 before:h-full before:w-3 before:bg-[#FAF1E6]"
-                      : "hover:bg-[#8CAB91] hover:text-white"
-                  }`
-                }
-              >
-                <TiUserAddOutline className="text-2xl" />
-                Make Admin
-              </NavLink>
-            </li>
+        <nav className="mt-5 py-4 lg:mt-3">
+          <ul className="mb-6 flex flex-col gap-1.5">
+            {/* Main Navigation Items */}
+            {navItems.map((item) => (
+              <NavItem key={item.to} to={item.to} icon={item.icon}>
+                {item.label}
+              </NavItem>
+            ))}
 
             {/* Subscription Dropdown */}
-            <SidebarLinkGroup
-              activeCondition={
-                pathname === "/Subscription" || pathname.includes("auth")
-              }
-            >
+            <SidebarLinkGroup activeCondition={pathname === "/subscription" || pathname.includes("/subscription")}>
               {(handleClick, open) => (
                 <>
                   <NavLink
                     to="#"
-                    className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-8 font-medium text-[#364636] duration-300 ease-in-out hover:bg-[#8CAB91] hover:text-white`}
+                    className="group relative flex items-center gap-2.5 rounded-sm py-2 px-8 font-medium text-[#364636] duration-300 ease-in-out hover:bg-[#8CAB91] hover:text-white"
                     onClick={(e) => {
-                      e.preventDefault();
-                      sidebarExpanded
-                        ? handleClick()
-                        : setSidebarExpanded(true);
+                      e.preventDefault()
+                      sidebarExpanded ? handleClick() : setSidebarExpanded(true)
                     }}
                   >
                     <ImPower className="text-2xl" />
                     Subscription
                     <svg
-                      className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${
+                      className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current transition-transform ${
                         open && "rotate-180"
                       }`}
                       width="20"
@@ -205,63 +194,32 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     </svg>
                   </NavLink>
                   {/* Dropdown Menu */}
-                  <div
-                    className={`translate transform overflow-hidden ${
-                      !open && "hidden"
-                    }`}
-                  >
-                    <ul className="mt-4 mb-5.5 flex flex-col gap-2.5 ">
-                      <li>
-                        <NavLink
-                          to="/subscription/subscription"
-                          className={({ isActive }) =>
-                            "group relative flex items-center gap-2.5 hover:!bg-[#8CAB91] hover:!text-white  px-16 py-2 font-medium text-[#364636] duration-300 ease-in-out " +
-                            (isActive &&
-                              "!bg-[#8CAB91] !text-white before:content-[''] before:absolute before:top-0 before:left-2 before:h-full before:w-3 before:bg-[#FAF1E6]")
-                          }
-                        >
-                          Subscription
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/subscription/couponCode"
-                          className={({ isActive }) =>
-                            "group relative flex items-center hover:!bg-[#8CAB91] hover:!text-white gap-2.5  px-16 py-2  font-medium text-[#364636] duration-300 ease-in-out " +
-                            (isActive &&
-                              "!bg-[#8CAB91] !text-white before:content-[''] before:absolute before:top-0 before:left-2 before:h-full before:w-3 before:bg-[#FAF1E6]")
-                          }
-                        >
-                          Coupon code
-                        </NavLink>
-                      </li>
+                  <div className={`transform overflow-hidden transition-all duration-300 ${!open && "hidden"}`}>
+                    <ul className="mt-4 mb-5.5 flex flex-col gap-2.5">
+                      <DropdownItem to="/subscription/subscription">Subscription</DropdownItem>
+                      <DropdownItem to="/subscription/couponCode">Coupon code</DropdownItem>
                     </ul>
                   </div>
                 </>
               )}
             </SidebarLinkGroup>
+
             {/* Settings Dropdown */}
-            <SidebarLinkGroup
-              activeCondition={
-                pathname === "/auth" || pathname.includes("auth")
-              }
-            >
+            <SidebarLinkGroup activeCondition={pathname === "/settings" || pathname.includes("/settings")}>
               {(handleClick, open) => (
                 <>
                   <NavLink
                     to="#"
-                    className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-8 font-medium text-[#364636] duration-300 ease-in-out hover:bg-[#8CAB91] hover:text-white`}
+                    className="group relative flex items-center gap-2.5 rounded-sm py-2 px-8 font-medium text-[#364636] duration-300 ease-in-out hover:bg-[#8CAB91] hover:text-white"
                     onClick={(e) => {
-                      e.preventDefault();
-                      sidebarExpanded
-                        ? handleClick()
-                        : setSidebarExpanded(true);
+                      e.preventDefault()
+                      sidebarExpanded ? handleClick() : setSidebarExpanded(true)
                     }}
                   >
                     <IoMdSettings className="text-2xl" />
                     Settings
                     <svg
-                      className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current ${
+                      className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current transition-transform ${
                         open && "rotate-180"
                       }`}
                       width="20"
@@ -279,36 +237,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     </svg>
                   </NavLink>
                   {/* Dropdown Menu */}
-                  <div
-                    className={`translate transform overflow-hidden ${
-                      !open && "hidden"
-                    }`}
-                  >
-                    <ul className="mt-4 mb-5.5 flex flex-col gap-2.5 ">
-                      <li>
-                        <NavLink
-                          to="/settings/termsAndConditions"
-                          className={({ isActive }) =>
-                            "group relative flex items-center gap-2.5 hover:!bg-[#8CAB91] hover:!text-white  px-16 py-2 font-medium text-[#364636] duration-300 ease-in-out " +
-                            (isActive &&
-                              "!bg-[#8CAB91] !text-white before:content-[''] before:absolute before:top-0 before:left-2 before:h-full before:w-3 before:bg-[#FAF1E6]")
-                          }
-                        >
-                          Terms & condition
-                        </NavLink>
-                      </li>
-                      <li>
-                        <NavLink
-                          to="/settings/privacyAndPolicy"
-                          className={({ isActive }) =>
-                            "group relative flex items-center hover:!bg-[#8CAB91] hover:!text-white gap-2.5  px-16 py-2  font-medium text-[#364636] duration-300 ease-in-out " +
-                            (isActive &&
-                              "!bg-[#8CAB91] !text-white before:content-[''] before:absolute before:top-0 before:left-2 before:h-full before:w-3 before:bg-[#FAF1E6]")
-                          }
-                        >
-                          Privacy policy
-                        </NavLink>
-                      </li>
+                  <div className={`transform overflow-hidden transition-all duration-300 ${!open && "hidden"}`}>
+                    <ul className="mt-4 mb-5.5 flex flex-col gap-2.5">
+                      <DropdownItem to="/settings/termsAndConditions">Terms & condition</DropdownItem>
+                      <DropdownItem to="/settings/privacyAndPolicy">Privacy policy</DropdownItem>
                     </ul>
                   </div>
                 </>
@@ -316,17 +248,19 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             </SidebarLinkGroup>
           </ul>
         </nav>
-        {/* Sidebar Menu */}
+
+        {/* Logout Button */}
         <button
           className="absolute bottom-20 right-20 flex items-center justify-center gap-1 cursor-pointer"
-          onClick={logout} // Attach the logout handler
+          onClick={logout}
         >
           <BiLogOut className="text-red-500 text-2xl rotate-180" />
           <p className="text-[#364636] text-base font-medium">Logout</p>
         </button>
       </div>
     </aside>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar
+
