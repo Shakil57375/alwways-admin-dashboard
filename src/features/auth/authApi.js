@@ -3,6 +3,7 @@ import { userLoggedIn } from "./authSlice"
 
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+    // Existing login mutation
     login: builder.mutation({
       query: (credentials) => ({
         url: "user/admin/login",
@@ -14,7 +15,6 @@ export const authApi = apiSlice.injectEndpoints({
           const { data } = await queryFulfilled
           const { token, _id, role, email, firstname, lastname, profilePicture } = data
 
-          // Dispatch userLoggedIn to update Redux state
           dispatch(
             userLoggedIn({
               user: {
@@ -29,7 +29,6 @@ export const authApi = apiSlice.injectEndpoints({
             }),
           )
 
-          // Persist user data to localStorage
           localStorage.setItem(
             "auth",
             JSON.stringify({
@@ -49,8 +48,35 @@ export const authApi = apiSlice.injectEndpoints({
         }
       },
     }),
+
+    // Send password reset email
+    forgotPassword: builder.mutation({
+      query: (email) => ({
+        url: "user/admin/forgot-password",
+        method: "POST",
+        body: { email },
+      }),
+    }),
+
+    // Verify OTP code
+    verifyCode: builder.mutation({
+      query: ({ email, code }) => ({
+        url: "user/verify-code",
+        method: "POST",
+        body: { email, code },
+      }),
+    }),
+
+    // Reset password with new password
+    resetPassword: builder.mutation({
+      query: ({ email, newPassword }) => ({
+        url: "user/admin/set-new-password",
+        method: "POST",
+        body: { email, newPassword },
+      }),
+    }),
   }),
 })
 
-export const { useLoginMutation } = authApi
+export const { useLoginMutation, useForgotPasswordMutation, useVerifyCodeMutation, useResetPasswordMutation } = authApi
 
