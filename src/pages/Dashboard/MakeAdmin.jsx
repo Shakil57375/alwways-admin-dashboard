@@ -1,45 +1,27 @@
-import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
+import { useState } from "react";
 import Modal from "../Modals/Modal";
 import ConfirmationModal from "../Modals/ConfirmationModal";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { toast } from "react-hot-toast";
-import { AuthContext } from "../../context/AuthContext";
+import {
+  useGetAllAdminsQuery,
+  useCreateAdminMutation,
+  useDeleteAdminMutation,
+} from "../../features/admin/adminApi";
 
 const MakeAdmin = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false); // For Make Admin Modal
-  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false); // For Delete Confirmation Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [name, setName] = useState("");
-  const [lastName, setLastName] = useState(""); // New last name field
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [currentAdmin, setCurrentAdmin] = useState(null); // To track admin for deletion
-  const [admins, setAdmins] = useState([]); // Store all admins
-  const { auth } = useContext(AuthContext);
+  const [currentAdmin, setCurrentAdmin] = useState(null);
 
-  const token = auth?.token; // Replace with actual token
-
-  // Fetch all admins on component mount
-  useEffect(() => {
-    const fetchAdmins = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:5001/api/user/get-all-admins",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setAdmins(response.data.admins);
-      } catch (error) {
-        toast.error("Failed to fetch admins");
-        console.error(error);
-      }
-    };
-
-    fetchAdmins();
-  }, [token]);
+  // RTK Query hooks
+  const { data: admins = [], isLoading } = useGetAllAdminsQuery();
+  const [createAdmin] = useCreateAdminMutation();
+  const [deleteAdmin] = useDeleteAdminMutation();
 
   // Handle Add New Admin
   const handleAddAdmin = async () => {
@@ -48,62 +30,52 @@ const MakeAdmin = () => {
       return;
     }
 
+    const fullName = `${name} ${lastName}`;
+
     try {
-      const response = await axios.post(
-        "http://localhost:5001/api/user/make-admin",
-        {
-          name,
-          lastname: lastName, // Include last name in the payload
-          email,
-          password,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      toast.success("Admin added successfully!");
-      setAdmins([...admins, response.data.user]); // Add the new admin to the list
+      await createAdmin({
+        name: fullName,
+        email,
+        password,
+      }).unwrap();
+
+      toast.success("Admin created successfully!");
       setIsModalOpen(false);
       resetFields();
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to add new admin"
-      );
-      console.error(error);
+      toast.error(error.data?.message || "Failed to create admin");
     }
   };
 
   // Handle Admin Deletion
   const handleConfirmDelete = async () => {
+    if (!currentAdmin?._id) return;
+
     try {
-      await axios.delete(
-        `http://localhost:5001/api/user/delete-admin/${currentAdmin._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await deleteAdmin(currentAdmin._id).unwrap();
       toast.success("Admin deleted successfully!");
-      setAdmins(admins.filter((admin) => admin._id !== currentAdmin._id));
       setIsConfirmationOpen(false);
+      setCurrentAdmin(null);
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to delete admin"
-      );
-      console.error(error);
+      toast.error(error.data?.message || "Failed to delete admin");
     }
   };
 
   // Reset input fields
   const resetFields = () => {
     setName("");
-    setLastName(""); // Reset last name
+    setLastName("");
     setEmail("");
     setPassword("");
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -131,7 +103,7 @@ const MakeAdmin = () => {
             </tr>
           </thead>
           <tbody>
-            {admins.map((admin, index) => (
+            {admins.admins?.map((admin, index) => (
               <tr key={admin._id} className="border-b">
                 <td className="px-4 py-2">{index + 1}</td>
                 <td className="px-4 py-2">{admin.firstname}</td>
