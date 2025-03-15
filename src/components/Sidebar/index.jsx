@@ -1,5 +1,7 @@
+"use client"
+
 import { useEffect, useRef, useState } from "react"
-import { NavLink, useLocation } from "react-router-dom"
+import { NavLink, useLocation, useNavigate } from "react-router-dom"
 import { FiShoppingBag } from "react-icons/fi"
 import { GoChecklist } from "react-icons/go"
 import { MdDashboard } from "react-icons/md"
@@ -7,6 +9,9 @@ import { TiUserAddOutline } from "react-icons/ti"
 import { ImPower } from "react-icons/im"
 import { IoMdSettings } from "react-icons/io"
 import { BiLogOut } from "react-icons/bi"
+import { useDispatch } from "react-redux"
+import { userLoggedOut } from "../../features/auth/authSlice"
+import LogoIcon from "../../images/logo/logo.png"
 
 // SidebarLinkGroup component for dropdown menus
 const SidebarLinkGroup = ({ children, activeCondition }) => {
@@ -26,15 +31,15 @@ const NavItem = ({ to, icon: Icon, children }) => {
       <NavLink
         to={to}
         className={({ isActive }) =>
-          `group relative flex items-center gap-2.5 rounded-sm py-2 px-8 font-medium text-[#364636] duration-300 ease-in-out ${
+          `group relative flex items-center gap-2.5 rounded-sm py-2 px-4 md:px-8 font-medium text-[#364636] duration-300 ease-in-out ${
             isActive
-              ? "bg-[#8CAB91] !text-white before:content-[''] before:absolute before:top-0 before:left-2 before:h-full before:w-3 before:bg-[#FAF1E6]"
+              ? "bg-[#8CAB91] !text-white before:content-[''] before:absolute before:top-0 before:left-0 md:before:left-2 before:h-full before:w-1 md:before:w-3 before:bg-[#FAF1E6]"
               : "hover:bg-[#8CAB91] hover:text-white"
           }`
         }
       >
-        <Icon className="text-2xl" />
-        {children}
+        <Icon className="text-xl md:text-2xl" />
+        <span className="text-sm md:text-base">{children}</span>
       </NavLink>
     </li>
   )
@@ -47,9 +52,9 @@ const DropdownItem = ({ to, children }) => {
       <NavLink
         to={to}
         className={({ isActive }) =>
-          "group relative flex items-center gap-2.5 hover:!bg-[#8CAB91] hover:!text-white px-16 py-2 font-medium text-[#364636] duration-300 ease-in-out " +
+          "group relative flex items-center gap-2.5 hover:!bg-[#8CAB91] hover:!text-white px-8 md:px-16 py-2 font-medium text-[#364636] text-sm md:text-base duration-300 ease-in-out " +
           (isActive &&
-            "!bg-[#8CAB91] !text-white before:content-[''] before:absolute before:top-0 before:left-2 before:h-full before:w-3 before:bg-[#FAF1E6]")
+            "!bg-[#8CAB91] !text-white before:content-[''] before:absolute before:top-0 before:left-0 md:before:left-2 before:h-full before:w-1 md:before:w-3 before:bg-[#FAF1E6]")
         }
       >
         {children}
@@ -61,14 +66,15 @@ const DropdownItem = ({ to, children }) => {
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const location = useLocation()
   const { pathname } = location
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const trigger = useRef(null)
   const sidebar = useRef(null)
 
-  // For logout functionality - replace with your actual auth context
-  const logout = () => {
-    console.log("Logging out...")
-    // Add your actual logout logic here
+  // For logout functionality
+  const handleLogout = () => {
+    dispatch(userLoggedOut())
   }
 
   const storedSidebarExpanded = localStorage.getItem("sidebar-expanded")
@@ -118,14 +124,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   return (
     <aside
       ref={sidebar}
-      className={`relative left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-[#FAF1E6] duration-300 ease-linear lg:static lg:translate-x-0 ${
+      className={`fixed left-0 top-0 z-50 flex h-screen w-64 md:w-72.5 flex-col overflow-y-hidden bg-[#FAF1E6] duration-300 ease-linear lg:static lg:translate-x-0 ${
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
       {/* Sidebar Header */}
-      <div className="flex items-center justify-between gap-2 px-6 py-1.5 lg:py-1.5">
-        <NavLink to="/">
-          <img src="/logo.png" alt="Logo" />
+      <div className="flex items-center justify-between gap-2 px-4 md:px-6 py-4 lg:py-6">
+        <NavLink to="/" className="flex items-center">
+          <img src={LogoIcon || "/placeholder.svg"} alt="Logo" className="h-10 w-auto" />
         </NavLink>
         <button
           ref={trigger}
@@ -152,8 +158,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
       <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
         {/* Sidebar Menu */}
-        <nav className="mt-5 py-4 lg:mt-3">
-          <ul className="mb-6 flex flex-col gap-1.5">
+        <nav className="mt-3 py-4">
+          <ul className="mb-6 flex flex-col gap-1">
             {/* Main Navigation Items */}
             {navItems.map((item) => (
               <NavItem key={item.to} to={item.to} icon={item.icon}>
@@ -167,20 +173,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 <>
                   <NavLink
                     to="#"
-                    className="group relative flex items-center gap-2.5 rounded-sm py-2 px-8 font-medium text-[#364636] duration-300 ease-in-out hover:bg-[#8CAB91] hover:text-white"
+                    className="group relative flex items-center gap-2.5 rounded-sm py-2 px-4 md:px-8 font-medium text-[#364636] duration-300 ease-in-out hover:bg-[#8CAB91] hover:text-white"
                     onClick={(e) => {
                       e.preventDefault()
                       sidebarExpanded ? handleClick() : setSidebarExpanded(true)
                     }}
                   >
-                    <ImPower className="text-2xl" />
-                    Subscription
+                    <ImPower className="text-xl md:text-2xl" />
+                    <span className="text-sm md:text-base">Subscription</span>
                     <svg
-                      className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current transition-transform ${
+                      className={`absolute right-2 md:right-4 top-1/2 -translate-y-1/2 fill-current transition-transform ${
                         open && "rotate-180"
                       }`}
-                      width="20"
-                      height="20"
+                      width="16"
+                      height="16"
                       viewBox="0 0 20 20"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
@@ -195,7 +201,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   </NavLink>
                   {/* Dropdown Menu */}
                   <div className={`transform overflow-hidden transition-all duration-300 ${!open && "hidden"}`}>
-                    <ul className="mt-4 mb-5.5 flex flex-col gap-2.5">
+                    <ul className="mt-2 mb-4 flex flex-col gap-2">
                       <DropdownItem to="/subscription/subscription">Subscription</DropdownItem>
                       <DropdownItem to="/subscription/couponCode">Coupon code</DropdownItem>
                     </ul>
@@ -210,20 +216,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 <>
                   <NavLink
                     to="#"
-                    className="group relative flex items-center gap-2.5 rounded-sm py-2 px-8 font-medium text-[#364636] duration-300 ease-in-out hover:bg-[#8CAB91] hover:text-white"
+                    className="group relative flex items-center gap-2.5 rounded-sm py-2 px-4 md:px-8 font-medium text-[#364636] duration-300 ease-in-out hover:bg-[#8CAB91] hover:text-white"
                     onClick={(e) => {
                       e.preventDefault()
                       sidebarExpanded ? handleClick() : setSidebarExpanded(true)
                     }}
                   >
-                    <IoMdSettings className="text-2xl" />
-                    Settings
+                    <IoMdSettings className="text-xl md:text-2xl" />
+                    <span className="text-sm md:text-base">Settings</span>
                     <svg
-                      className={`absolute right-4 top-1/2 -translate-y-1/2 fill-current transition-transform ${
+                      className={`absolute right-2 md:right-4 top-1/2 -translate-y-1/2 fill-current transition-transform ${
                         open && "rotate-180"
                       }`}
-                      width="20"
-                      height="20"
+                      width="16"
+                      height="16"
                       viewBox="0 0 20 20"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
@@ -238,7 +244,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   </NavLink>
                   {/* Dropdown Menu */}
                   <div className={`transform overflow-hidden transition-all duration-300 ${!open && "hidden"}`}>
-                    <ul className="mt-4 mb-5.5 flex flex-col gap-2.5">
+                    <ul className="mt-2 mb-4 flex flex-col gap-2">
                       <DropdownItem to="/settings/termsAndConditions">Terms & condition</DropdownItem>
                       <DropdownItem to="/settings/privacyAndPolicy">Privacy policy</DropdownItem>
                     </ul>
@@ -251,11 +257,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
         {/* Logout Button */}
         <button
-          className="absolute bottom-20 right-20 flex items-center justify-center gap-1 cursor-pointer"
-          onClick={logout}
+          className="absolute bottom-8 left-0 right-0 mx-auto flex items-center justify-center gap-2 cursor-pointer px-4 md:px-8 py-2  rounded-md transition-colors"
+          onClick={handleLogout}
         >
-          <BiLogOut className="text-red-500 text-2xl rotate-180" />
-          <p className="text-[#364636] text-base font-medium">Logout</p>
+          <BiLogOut className="text-red-500 text-xl md:text-2xl rotate-180" />
+          <p className="text-[#364636] text-sm md:text-base font-medium">Logout</p>
         </button>
       </div>
     </aside>
