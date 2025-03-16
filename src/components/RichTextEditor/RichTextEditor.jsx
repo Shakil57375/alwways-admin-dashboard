@@ -117,7 +117,9 @@ const RichTextEditor = ({ type = "terms" }) => {
       </div>
 
       {isFetching ? (
-        <div className="p-4">Loading...</div>
+        <div className="flex justify-center items-center h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-[#8CAB91]"></div>
+        </div>
       ) : (
         <JoditEditor
           ref={editor}

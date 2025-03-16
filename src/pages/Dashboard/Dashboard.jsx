@@ -8,10 +8,12 @@ import UserGrowth from "../../components/Dashboard/UserGrowth";
 import SubscriberGrowth from "../../components/Dashboard/SubscriberGrowth";
 import UserTable from "../../components/Dashboard/Table/UserTable";
 import { useGetAllUsersQuery } from "../../features/user/userApi";
+import { useFetchIncomeReportQuery } from "../../features/dashboardGrapReport/dashboardGraphReport";
 
 const Dashboard = () => {
   const { data: users, isLoading } = useGetAllUsersQuery();
-  console.log(users);
+  const { data: income } = useFetchIncomeReportQuery();
+  const totalIncome = income?.orders[0]?.totalIncome;
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -35,8 +37,7 @@ const Dashboard = () => {
         />
         <StatCard
           icon={<MdOutlineAttachMoney className="text-5xl" />}
-          currency="$"
-          value="14k"
+          value={totalIncome}
           growthIcon={<GrLineChart className="text-green-600 text-xl" />}
           description="Total Income"
         />

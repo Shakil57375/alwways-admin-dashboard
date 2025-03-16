@@ -163,7 +163,7 @@ const Questionnaire = () => {
                 {section.name}
               </h2>
               <p className="text-sm text-[#8CAB91]">
-                {section.questionsAdded || 0}/{section.numberOfQuestions}{" "}
+                {section.questionsCount || 0}/{section.numberOfQuestions}{" "}
                 Questions Added
               </p>
             </div>

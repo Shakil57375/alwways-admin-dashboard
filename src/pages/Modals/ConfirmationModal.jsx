@@ -52,14 +52,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, subscriptionId, subscri
                   "Do you want to delete this subscription?"
                 )}
               </p>
-              <p className="text-center text-gray-500 text-sm mb-6">
-                This action cannot be undone. Subscription ID:{" "}
-                {subscriptionId ? (
-                  <span className="font-mono bg-gray-100 px-1 rounded">{subscriptionId}</span>
-                ) : (
-                  "Unknown"
-                )}
-              </p>
+              
               <div className="flex space-x-3">
                 <button
                   onClick={onClose}
