@@ -24,7 +24,7 @@ const Dashboard = () => {
   const totalUsers = users?.length;
   return (
     <div>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
         <StatCard
           icon={<PiUsersThreeLight className="text-5xl" />}
           value={totalUsers}
@@ -32,7 +32,7 @@ const Dashboard = () => {
         />
         <StatCard
           icon={<FiUsers className="text-5xl" />}
-          value="1k"
+          value="10"
           description="Total Subscribers"
         />
         <StatCard
