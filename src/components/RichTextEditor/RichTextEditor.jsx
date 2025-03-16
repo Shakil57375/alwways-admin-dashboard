@@ -1,25 +1,38 @@
-"use client"
+// components/RichTextEditor/RichTextEditor.jsx
+"use client";
 
-import React, { useRef, useEffect } from "react"
-import JoditEditor from "jodit-react"
+import React, { useRef, useEffect, useState } from "react";
+import JoditEditor from "jodit-react";
+import {
+  useFetchPoliciesQuery,
+  useUpdatePoliciesMutation,
+} from "../../features/settings/settingsApi";
 
-const RichTextEditor = ({ initialContent = "", onSave, loading = false }) => {
-  const editor = useRef(null)
-  const [content, setContent] = React.useState(initialContent)
+const RichTextEditor = ({ type = "terms" }) => {
+  const editor = useRef(null);
+  const [content, setContent] = useState("");
+  const [isEditMode, setIsEditMode] = useState(false);
 
-  // Update content when initialContent changes (e.g., when data is loaded from API)
+  // Fetch policies
+  const { data: policies, isLoading: isFetching } = useFetchPoliciesQuery();
+  const [updatePolicies, { isLoading: isUpdating }] =
+    useUpdatePoliciesMutation();
+
+  // Set initial content based on type
   useEffect(() => {
-    if (initialContent) {
-      setContent(initialContent)
+    if (policies) {
+      setContent(
+        type === "terms" ? policies.termsAndConditions : policies.privacyPolicy
+      );
     }
-  }, [initialContent])
+  }, [policies, type]);
 
-  // Configuration for Jodit Editor
+  // Editor configuration
   const config = {
-    readonly: false, // Enables editing
-    toolbarSticky: true, // Toolbar sticks to the top when scrolling
+    readonly: !isEditMode,
+    toolbarSticky: true,
     buttons: [
-      "source", // HTML source code
+      "source",
       "|",
       "bold",
       "italic",
@@ -49,67 +62,112 @@ const RichTextEditor = ({ initialContent = "", onSave, loading = false }) => {
       "redo",
       "fullsize",
     ],
-    buttonsXS: ["bold", "italic", "underline", "align", "ul", "ol", "undo", "redo"], // Toolbar for smaller screens
+    buttonsXS: [
+      "bold",
+      "italic",
+      "underline",
+      "align",
+      "ul",
+      "ol",
+      "undo",
+      "redo",
+    ],
     showCharsCounter: true,
     showWordsCounter: true,
     showXPathInStatusbar: false,
     toolbarInline: false,
-    height: 500, // Fixed height
+    height: 500,
     width: "100%",
     placeholder: "Start typing here...",
     uploader: {
-      insertImageAsBase64URI: true, // Convert images to base64 to store inline
+      insertImageAsBase64URI: true,
     },
-  }
+  };
 
-  const handleSave = () => {
-    if (onSave) {
-      onSave(content)
+  const handleSave = async () => {
+    try {
+      const updatedData =
+        type === "terms"
+          ? { termsAndConditions: content }
+          : { privacyPolicy: content };
+
+      await updatePolicies(updatedData).unwrap();
+      setIsEditMode(false);
+    } catch (error) {
+      console.error("Failed to save:", error);
     }
-  }
+  };
+
+  const toggleEditMode = () => {
+    setIsEditMode(!isEditMode);
+  };
 
   return (
     <div className="w-full bg-white rounded-lg shadow-sm">
-      <JoditEditor
-        ref={editor}
-        value={content}
-        config={config}
-        onBlur={(newContent) => setContent(newContent)} // Save content on blur
-        onChange={(newContent) => {}}
-        className="border border-gray-300 rounded-t-lg"
-      />
-
-      <div className="flex justify-end p-3 bg-gray-50 rounded-b-lg border-t border-gray-200">
+      <div className="flex justify-between items-center p-3 bg-gray-50 border-b border-gray-200">
+        <h3 className="text-lg font-semibold">
+          {type === "terms" ? "Terms and Conditions" : "Privacy Policy"}
+        </h3>
         <button
-          onClick={handleSave}
-          disabled={loading}
-          className="px-4 py-2 bg-[#8CAB91] text-white rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={toggleEditMode}
+          className="px-3 py-1 bg-[#8CAB91] text-white rounded-md hover:bg-opacity-90 transition-colors"
         >
-          {loading ? (
-            <span className="flex items-center">
-              <svg
-                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Saving...
-            </span>
-          ) : (
-            "Save Changes"
-          )}
+          {isEditMode ? "View " : "Edit "}
         </button>
       </div>
+
+      {isFetching ? (
+        <div className="p-4">Loading...</div>
+      ) : (
+        <JoditEditor
+          ref={editor}
+          value={content}
+          config={config}
+          onBlur={(newContent) => setContent(newContent)}
+          onChange={(newContent) => {}}
+          className="border border-gray-300"
+        />
+      )}
+
+      {isEditMode && (
+        <div className="flex justify-end p-3 bg-gray-50 rounded-b-lg border-t border-gray-200">
+          <button
+            onClick={handleSave}
+            disabled={isUpdating}
+            className="px-4 py-2 bg-[#8CAB91] text-white rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isUpdating ? (
+              <span className="flex items-center">
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Saving...
+              </span>
+            ) : (
+              "Save Changes"
+            )}
+          </button>
+        </div>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default RichTextEditor
-
+export default RichTextEditor;

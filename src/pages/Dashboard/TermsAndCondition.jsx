@@ -1,13 +1,14 @@
-import React from "react";
-import RichTextEditor from "../../components/RichTextEditor/RichTextEditor";
+// pages/TermsAndCondition.jsx
+import React from "react"
+import RichTextEditor from "../../components/RichTextEditor/RichTextEditor"
 
 const TermsAndCondition = () => {
   return (
-    <div>
-      <p className="text-3xl font-bold mb-8 text-black">Terms and condition</p>
-      <RichTextEditor/>
+    <div className="p-6">
+      <p className="text-3xl font-bold mb-8 text-black">Terms and Conditions</p>
+      <RichTextEditor type="terms" />
     </div>
-  );
-};
+  )
+}
 
-export default TermsAndCondition;
+export default TermsAndCondition

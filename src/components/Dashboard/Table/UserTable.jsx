@@ -86,7 +86,7 @@ const UserTable = ({ isDashboard, isOrderManagement }) => {
 
   return (
     <div className="p-6">
-      <h1 className="text-xl font-bold mb-4">{isOrderManagement ? "Order list" : "Subscriber"}</h1>
+      <h1 className="text-xl font-bold mb-4">{isOrderManagement ? "Order list" : "Users"}</h1>
       <FilterBar
         search={search}
         setSearch={setSearch}
