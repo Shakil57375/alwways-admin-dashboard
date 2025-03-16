@@ -1,87 +1,100 @@
-import { useState } from "react"
-import { AiOutlineDelete } from "react-icons/ai"
-import { FaRegEdit } from "react-icons/fa"
-import { useParams, useNavigate } from "react-router-dom"
-import Swal from "sweetalert2"
-import { IoMdArrowRoundBack } from "react-icons/io"
+import { useState } from "react";
+import { AiOutlineDelete } from "react-icons/ai";
+import { FaRegEdit } from "react-icons/fa";
+import { useParams, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import { IoMdArrowRoundBack } from "react-icons/io";
 import {
   useGetQuestionsBySectionQuery,
   useAddQuestionMutation,
   useUpdateQuestionMutation,
   useDeleteQuestionMutation,
   useGetSectionsQuery,
-} from "../../../features/questionnarie/questionnarieApi"
-import Modal from "../../../pages/Modals/Modal"
+} from "../../../features/questionnarie/questionnarieApi";
+import Modal from "../../../pages/Modals/Modal";
 
 const PreviewQuestions = () => {
-  const { sectionId } = useParams()
-  const navigate = useNavigate()
+  const { sectionId } = useParams();
+  const navigate = useNavigate();
 
   // State variables
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [newQuestions, setNewQuestions] = useState([""])
-  const [currentQuestion, setCurrentQuestion] = useState(null)
-  const [editedQuestionText, setEditedQuestionText] = useState("")
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [newQuestions, setNewQuestions] = useState([""]);
+  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [editedQuestionText, setEditedQuestionText] = useState("");
 
   // RTK Query hooks
-  const { data: sections = [] } = useGetSectionsQuery()
-  const section = sections.find((sec) => sec._id === sectionId)
+  const { data: sections = [] } = useGetSectionsQuery();
+  const section = sections.find((sec) => sec._id === sectionId);
 
-  const { data: questions = [], isLoading: isLoadingQuestions } = useGetQuestionsBySectionQuery(sectionId)
-  const [addQuestion, { isLoading: isAddingQuestion }] = useAddQuestionMutation()
-  const [updateQuestion, { isLoading: isUpdatingQuestion }] = useUpdateQuestionMutation()
-  const [deleteQuestion] = useDeleteQuestionMutation()
+  const { data: questions = [], isLoading: isLoadingQuestions } =
+    useGetQuestionsBySectionQuery(sectionId);
+  const [addQuestion, { isLoading: isAddingQuestion }] =
+    useAddQuestionMutation();
+  const [updateQuestion, { isLoading: isUpdatingQuestion }] =
+    useUpdateQuestionMutation();
+  const [deleteQuestion] = useDeleteQuestionMutation();
+
+  // Generate random episodeIndex
+  const generateEpisodeIndex = () => {
+    return Math.floor(Math.random() * 1000);
+  };
 
   // Add a new question modal
   const openAddModal = () => {
-    setNewQuestions([""])
-    setIsAddModalOpen(true)
-  }
+    setNewQuestions([""]);
+    setIsAddModalOpen(true);
+  };
 
   // Edit question modal
   const openEditModal = (question) => {
-    setCurrentQuestion(question)
-    setEditedQuestionText(question.text)
-    setIsEditModalOpen(true)
-  }
+    setCurrentQuestion(question);
+    setEditedQuestionText(question.text);
+    setIsEditModalOpen(true);
+  };
 
   // Handle adding questions
   const handleAddQuestion = async () => {
-    const validQuestions = newQuestions.filter((q) => q.trim() !== "")
+    const validQuestions = newQuestions.filter((q) => q.trim() !== "");
 
     if (validQuestions.length === 0) {
       Swal.fire({
         icon: "error",
         title: "Error",
         text: "Please enter at least one question",
-      })
-      return
+      });
+      return;
     }
 
     try {
-      // Add each question one by one
-      for (const questionText of validQuestions) {
-        await addQuestion({
-          text: questionText,
-          sectionId,
-        }).unwrap()
-      }
+      // Format questions as required by the API - array of strings
+      const questionsData = {
+        sectionId,
+        // episodeIndex: generateEpisodeIndex(),
+        questions: validQuestions, // Direct array of strings
+      };
 
-      setIsAddModalOpen(false)
+      await addQuestion(questionsData).unwrap();
+
+      setIsAddModalOpen(false);
       Swal.fire({
         icon: "success",
         title: "Success",
-        text: validQuestions.length > 1 ? "Questions added successfully!" : "Question added successfully!",
-      })
+        text:
+          validQuestions.length > 1
+            ? "Questions added successfully!"
+            : "Question added successfully!",
+      });
     } catch (error) {
+      console.error("Error adding questions:", error);
       Swal.fire({
         icon: "error",
         title: "Error",
         text: error.data?.message || "Failed to add question(s)",
-      })
+      });
     }
-  }
+  };
 
   // Handle editing a question
   const handleEditQuestion = async () => {
@@ -90,34 +103,37 @@ const PreviewQuestions = () => {
         icon: "error",
         title: "Error",
         text: "Question text is required",
-      })
-      return
+      });
+      return;
     }
 
     try {
       await updateQuestion({
         id: currentQuestion._id,
-        text: editedQuestionText,
         sectionId,
-      }).unwrap()
+        episodeIndex: generateEpisodeIndex(),
+        text: editedQuestionText,
+      }).unwrap();
 
-      setIsEditModalOpen(false)
+      setIsEditModalOpen(false);
       Swal.fire({
         icon: "success",
         title: "Success",
         text: "Question updated successfully!",
-      })
+      });
     } catch (error) {
+      console.error("Error updating question:", error);
       Swal.fire({
         icon: "error",
         title: "Error",
         text: error.data?.message || "Failed to update question",
-      })
+      });
     }
-  }
+  };
 
   // Delete a question with confirmation
   const handleDeleteQuestion = async (question) => {
+    console.log(question?._id);
     const result = await Swal.fire({
       title: "Are you sure?",
       text: "Do you really want to delete this question?",
@@ -126,45 +142,47 @@ const PreviewQuestions = () => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, delete it!",
-    })
+    });
 
     if (result.isConfirmed) {
       try {
-        await deleteQuestion({ id: question._id, sectionId }).unwrap()
-        Swal.fire("Deleted!", "The question has been deleted.", "success")
+        await deleteQuestion(question?._id).unwrap();
+
+        Swal.fire("Deleted!", "The question has been deleted.", "success");
       } catch (error) {
+        console.error("Error deleting question:", error);
         Swal.fire({
           icon: "error",
           title: "Error",
           text: error.data?.message || "Failed to delete question",
-        })
+        });
       }
     }
-  }
+  };
 
   // Add more question inputs
   const addMoreQuestionInput = () => {
-    setNewQuestions([...newQuestions, ""])
-  }
+    setNewQuestions([...newQuestions, ""]);
+  };
 
   // Handle question input change
   const handleQuestionInputChange = (index, value) => {
-    const updatedQuestions = [...newQuestions]
-    updatedQuestions[index] = value
-    setNewQuestions(updatedQuestions)
-  }
+    const updatedQuestions = [...newQuestions];
+    updatedQuestions[index] = value;
+    setNewQuestions(updatedQuestions);
+  };
 
   // Navigate back
   const handleBack = () => {
-    navigate(-1)
-  }
+    navigate(-1);
+  };
 
   if (isLoadingQuestions) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#8CAB91]"></div>
       </div>
-    )
+    );
   }
 
   return (
@@ -199,10 +217,16 @@ const PreviewQuestions = () => {
               {index + 1}. {question.text}
             </p>
             <div className="flex items-center space-x-4 text-[#212121]">
-              <button onClick={() => openEditModal(question)} className="hover:text-[#8CAB91] transition-colors">
+              <button
+                onClick={() => openEditModal(question)}
+                className="hover:text-[#8CAB91] transition-colors"
+              >
                 <FaRegEdit className="text-2xl" />
               </button>
-              <button onClick={() => handleDeleteQuestion(question)} className="hover:text-red-500 transition-colors">
+              <button
+                onClick={() => handleDeleteQuestion(question)}
+                className="hover:text-red-500 transition-colors"
+              >
                 <AiOutlineDelete className="text-2xl" />
               </button>
             </div>
@@ -217,7 +241,11 @@ const PreviewQuestions = () => {
       </div>
 
       {/* Add Question Modal */}
-      <Modal title="Add New Question" isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)}>
+      <Modal
+        title="Add New Question"
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+      >
         <div className="space-y-4">
           {newQuestions.map((q, index) => (
             <div key={index} className="flex items-center space-x-2">
@@ -225,7 +253,9 @@ const PreviewQuestions = () => {
                 type="text"
                 placeholder="Type question here"
                 value={q}
-                onChange={(e) => handleQuestionInputChange(index, e.target.value)}
+                onChange={(e) =>
+                  handleQuestionInputChange(index, e.target.value)
+                }
                 className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#8CAB91]"
               />
               {index === newQuestions.length - 1 && (
@@ -252,7 +282,14 @@ const PreviewQuestions = () => {
                 fill="none"
                 viewBox="0 0 24 24"
               >
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
                 <path
                   className="opacity-75"
                   fill="currentColor"
@@ -268,7 +305,11 @@ const PreviewQuestions = () => {
       </Modal>
 
       {/* Edit Question Modal */}
-      <Modal title="Edit Question" isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)}>
+      <Modal
+        title="Edit Question"
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+      >
         <div className="mb-4">
           <label className="block font-medium mb-1">Question</label>
           <input
@@ -292,7 +333,14 @@ const PreviewQuestions = () => {
                 fill="none"
                 viewBox="0 0 24 24"
               >
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
                 <path
                   className="opacity-75"
                   fill="currentColor"
@@ -307,8 +355,7 @@ const PreviewQuestions = () => {
         </button>
       </Modal>
     </div>
-  )
-}
+  );
+};
 
-export default PreviewQuestions
-
+export default PreviewQuestions;
