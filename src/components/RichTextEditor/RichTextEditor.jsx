@@ -1,49 +1,115 @@
-import React, { useRef } from "react";
-import JoditEditor from "jodit-react";
+"use client"
 
-const FullScreenRichTextEditor = () => {
-  const editor = useRef(null);
-  const [content, setContent] = React.useState("");
+import React, { useRef, useEffect } from "react"
+import JoditEditor from "jodit-react"
+
+const RichTextEditor = ({ initialContent = "", onSave, loading = false }) => {
+  const editor = useRef(null)
+  const [content, setContent] = React.useState(initialContent)
+
+  // Update content when initialContent changes (e.g., when data is loaded from API)
+  useEffect(() => {
+    if (initialContent) {
+      setContent(initialContent)
+    }
+  }, [initialContent])
 
   // Configuration for Jodit Editor
   const config = {
     readonly: false, // Enables editing
-    toolbarSticky: false, // Toolbar won't stick to the top
+    toolbarSticky: true, // Toolbar sticks to the top when scrolling
     buttons: [
-      "fontsize", // Font size dropdown
-      "bold",     // Bold button
-      "italic",   // Italic button
-      "underline", // Underline button
-      "align",    // Align options
-    ],
-    buttonsXS: [
-      "fontsize",
+      "source", // HTML source code
+      "|",
       "bold",
       "italic",
       "underline",
+      "strikethrough",
+      "eraser",
+      "superscript",
+      "subscript",
+      "|",
+      "font",
+      "fontsize",
+      "brush",
+      "paragraph",
+      "|",
       "align",
-    ], // Toolbar for smaller screens
-    showCharsCounter: false, // Disable character counter
-    showWordsCounter: false, // Disable word counter
-    showXPathInStatusbar: false, // Hide XPath in status bar
-    toolbarInline: false, // Disable inline toolbar
-    height: "100%", // Full height of the container
-    width: "100%", // Full width of the container
+      "ul",
+      "ol",
+      "outdent",
+      "indent",
+      "|",
+      "table",
+      "link",
+      "image",
+      "hr",
+      "|",
+      "undo",
+      "redo",
+      "fullsize",
+    ],
+    buttonsXS: ["bold", "italic", "underline", "align", "ul", "ol", "undo", "redo"], // Toolbar for smaller screens
+    showCharsCounter: true,
+    showWordsCounter: true,
+    showXPathInStatusbar: false,
+    toolbarInline: false,
+    height: 500, // Fixed height
+    width: "100%",
     placeholder: "Start typing here...",
-  };
+    uploader: {
+      insertImageAsBase64URI: true, // Convert images to base64 to store inline
+    },
+  }
+
+  const handleSave = () => {
+    if (onSave) {
+      onSave(content)
+    }
+  }
 
   return (
-    <div className="w-full h-full  bg-gray-50">
+    <div className="w-full bg-white rounded-lg shadow-sm">
       <JoditEditor
         ref={editor}
         value={content}
         config={config}
         onBlur={(newContent) => setContent(newContent)} // Save content on blur
         onChange={(newContent) => {}}
-        className="h-full w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-blue-500"
+        className="border border-gray-300 rounded-t-lg"
       />
-    </div>
-  );
-};
 
-export default FullScreenRichTextEditor;
+      <div className="flex justify-end p-3 bg-gray-50 rounded-b-lg border-t border-gray-200">
+        <button
+          onClick={handleSave}
+          disabled={loading}
+          className="px-4 py-2 bg-[#8CAB91] text-white rounded-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? (
+            <span className="flex items-center">
+              <svg
+                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              Saving...
+            </span>
+          ) : (
+            "Save Changes"
+          )}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export default RichTextEditor
+
