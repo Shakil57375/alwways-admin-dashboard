@@ -34,7 +34,7 @@ const TableRow = ({ item, onRowClick, isOrderManagement, isDashboard }) => {
         <td className="px-4 py-2">{item.subscriptionType}</td>
       )}
       {/* Conditionally render Income */}
-      {!isOrderManagement && <td className="px-4 py-2">${item.price}</td>}
+      {!isOrderManagement && <td className="px-4 py-2">${item.income}</td>}
 
       {isDashboard && (
         <td className="px-4 py-2 text-center">
