@@ -65,6 +65,20 @@ export const questionnaireApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: (result, error, { sectionId }) => [{ type: "Questions", id: sectionId }, "Sections"],
     }),
+    // Notification endpoints
+    getNotifications: builder.query({
+      query: () => "user/notifications",
+      providesTags: ["Notifications"],
+    }),
+
+    updateNotificationStatus: builder.mutation({
+      query: (id) => ({
+        url: `user/notifications/${id}`,
+        method: "PUT",
+        body: { status: "read" }, // Adjust to match API expectation
+      }),
+      invalidatesTags: ["Notifications"],
+    }),
   }),
 });
 
@@ -77,4 +91,6 @@ export const {
   useAddQuestionMutation,
   useUpdateQuestionMutation,
   useDeleteQuestionMutation,
+  useGetNotificationsQuery,
+  useUpdateNotificationStatusMutation,
 } = questionnaireApi;
