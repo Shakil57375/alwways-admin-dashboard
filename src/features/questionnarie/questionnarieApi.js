@@ -1,4 +1,4 @@
-import { apiSlice } from "../api/apiSlice"
+import { apiSlice } from "../api/apiSlice";
 
 export const questionnaireApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -66,7 +66,7 @@ export const questionnaireApi = apiSlice.injectEndpoints({
       invalidatesTags: (result, error, { sectionId }) => [{ type: "Questions", id: sectionId }, "Sections"],
     }),
   }),
-})
+});
 
 export const {
   useGetSectionsQuery,
@@ -77,5 +77,4 @@ export const {
   useAddQuestionMutation,
   useUpdateQuestionMutation,
   useDeleteQuestionMutation,
-} = questionnaireApi
-
+} = questionnaireApi;

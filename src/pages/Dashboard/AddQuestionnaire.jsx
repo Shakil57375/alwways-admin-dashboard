@@ -16,7 +16,8 @@ const Questionnaire = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState("add");
   const [currentSection, setCurrentSection] = useState(null);
-  const [sectionName, setSectionName] = useState("");
+  const [sectionNameEn, setSectionNameEn] = useState("");
+  const [sectionNameEs, setSectionNameEs] = useState("");
   const [sectionQuestions, setSectionQuestions] = useState("");
 
   // RTK Query hooks
@@ -27,7 +28,8 @@ const Questionnaire = () => {
 
   const openAddModal = () => {
     setModalType("add");
-    setSectionName("");
+    setSectionNameEn("");
+    setSectionNameEs("");
     setSectionQuestions("");
     setIsModalOpen(true);
   };
@@ -35,24 +37,25 @@ const Questionnaire = () => {
   const openEditModal = (section) => {
     setModalType("edit");
     setCurrentSection(section);
-    setSectionName(section.name);
+    setSectionNameEn(section.name.en);
+    setSectionNameEs(section.name.es);
     setSectionQuestions(section.numberOfQuestions.toString());
     setIsModalOpen(true);
   };
 
   const handleAddSection = async () => {
-    if (!sectionName.trim()) {
+    if (!sectionNameEn.trim() || !sectionNameEs.trim()) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "Section name is required",
+        text: "Section name is required in both English and Spanish",
       });
       return;
     }
 
     try {
       await addSection({
-        name: sectionName,
+        name: { en: sectionNameEn, es: sectionNameEs },
         numberOfQuestions: Number.parseInt(sectionQuestions, 10) || 10,
       }).unwrap();
 
@@ -72,11 +75,11 @@ const Questionnaire = () => {
   };
 
   const handleEditSection = async () => {
-    if (!sectionName.trim()) {
+    if (!sectionNameEn.trim() || !sectionNameEs.trim()) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "Section name is required",
+        text: "Section name is required in both English and Spanish",
       });
       return;
     }
@@ -84,7 +87,7 @@ const Questionnaire = () => {
     try {
       await updateSection({
         id: currentSection._id,
-        name: sectionName,
+        name: { en: sectionNameEn, es: sectionNameEs },
         numberOfQuestions: Number.parseInt(sectionQuestions, 10),
       }).unwrap();
 
@@ -106,7 +109,7 @@ const Questionnaire = () => {
   const handleDeleteSection = async (section) => {
     const result = await Swal.fire({
       title: "Are you sure?",
-      text: `Do you really want to delete the section "${section.name}"? This action cannot be undone.`,
+      text: `Do you really want to delete the section "${section.name.en}"? This action cannot be undone.`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -119,7 +122,7 @@ const Questionnaire = () => {
         await deleteSection(section._id).unwrap();
         Swal.fire(
           "Deleted!",
-          `The section "${section.name}" has been deleted.`,
+          `The section "${section.name.en}" has been deleted.`,
           "success"
         );
       } catch (error) {
@@ -160,7 +163,7 @@ const Questionnaire = () => {
           >
             <div>
               <h2 className="text-2xl font-medium text-black">
-                {section.name}
+                {section.name.en} / {section.name.es}
               </h2>
               <p className="text-sm text-[#8CAB91]">
                 {section.questionsCount || 0}/{section.numberOfQuestions}{" "}
@@ -203,12 +206,22 @@ const Questionnaire = () => {
         onClose={() => setIsModalOpen(false)}
       >
         <div className="mb-4">
-          <label className="block font-medium mb-1">Section Name</label>
+          <label className="block font-medium mb-1">Section Name (English)</label>
           <input
             type="text"
-            placeholder="Type here"
-            value={sectionName}
-            onChange={(e) => setSectionName(e.target.value)}
+            placeholder="Type here (English)"
+            value={sectionNameEn}
+            onChange={(e) => setSectionNameEn(e.target.value)}
+            className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#8CAB91]"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block font-medium mb-1">Section Name (Spanish)</label>
+          <input
+            type="text"
+            placeholder="Type here (Spanish)"
+            value={sectionNameEs}
+            onChange={(e) => setSectionNameEs(e.target.value)}
             className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#8CAB91]"
           />
         </div>
