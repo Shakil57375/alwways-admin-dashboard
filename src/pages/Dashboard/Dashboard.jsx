@@ -13,7 +13,8 @@ import { useFetchIncomeReportQuery } from "../../features/dashboardGrapReport/da
 const Dashboard = () => {
   const { data: users, isLoading } = useGetAllUsersQuery();
   const { data: income } = useFetchIncomeReportQuery();
-  const totalIncome = income?.orders[0]?.totalIncome;
+  const totalIncome = income?.users[0]?.totalIncome;
+  console.log(income);
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
