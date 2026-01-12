@@ -132,13 +132,19 @@ const AdminProfile = () => {
     }
 
     try {
+      // Create FormData similar to profile update
+      const formData = new FormData();
+
       const passwordData = {
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
         confirmPassword: data.confirmPassword,
       };
 
-      const response = await changePassword(passwordData).unwrap();
+      // Append as userData JSON string
+      formData.append('userData', JSON.stringify(passwordData));
+
+      const response = await changePassword(formData).unwrap();
 
       toast.success(response.message || 'Password updated successfully!');
 
