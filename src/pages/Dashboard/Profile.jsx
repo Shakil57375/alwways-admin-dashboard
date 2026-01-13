@@ -23,7 +23,7 @@ const AdminProfile = () => {
     isLoading: isLoadingProfile,
     refetch,
   } = useGetUserProfileQuery();
-
+  console.log(profileData);
   // RTK Query Mutations
   const [updateAdminProfile, { isLoading: isUpdatingProfile }] =
     useUpdateAdminProfileMutation();

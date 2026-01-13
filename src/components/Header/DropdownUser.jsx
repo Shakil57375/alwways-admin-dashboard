@@ -1,11 +1,18 @@
-import { useContext, useState } from "react";
-import { Link } from "react-router-dom";
-import ClickOutside from "../ClickOutside";
-import UserOne from "../../images/user/user-01.png";
-import { AuthContext } from "../../context/AuthContext";
+import { useContext, useState } from 'react';
+import { Link } from 'react-router-dom';
+import ClickOutside from '../ClickOutside';
+import UserOne from '../../images/user/user-01.png';
+import { AuthContext } from '../../context/AuthContext';
+import { useGetUserProfileQuery } from '../../features/user/userApi';
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const {
+    data: profileData,
+    isLoading: isLoadingProfile,
+    refetch,
+  } = useGetUserProfileQuery();
+  console.log(profileData);
   const { auth } = useContext(AuthContext);
   console.log(auth);
   return (
@@ -16,7 +23,7 @@ const DropdownUser = () => {
         to="/profile"
       >
         <span className="h-12 w-12 rounded-full">
-          <img src={UserOne} alt="User" />
+          <img src={profileData?.profilePicture} alt="User" />
         </span>
 
         <span className="hidden text-right lg:block">
