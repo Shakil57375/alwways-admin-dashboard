@@ -1,7 +1,13 @@
-import React from "react";
-import TableRow from "./TableRow";
+import React from 'react';
+import TableRow from './TableRow';
 
-const Table = ({ data, onRowClick, isOrderManagement, isDashboard }) => {
+const Table = ({
+  data,
+  onRowClick,
+  onDeleteClick,
+  isOrderManagement,
+  isDashboard,
+}) => {
   return (
     <table className="w-full border-collapse border rounded-lg">
       <thead>
@@ -30,6 +36,7 @@ const Table = ({ data, onRowClick, isOrderManagement, isDashboard }) => {
             key={item.id}
             item={item}
             onRowClick={onRowClick}
+            onDeleteClick={onDeleteClick}
             isOrderManagement={isOrderManagement}
           />
         ))}
