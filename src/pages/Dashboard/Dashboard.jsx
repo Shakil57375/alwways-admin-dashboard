@@ -50,7 +50,7 @@ const Dashboard = () => {
       <div className="mt-6">
         <IncomeReport />
       </div>
-      <UserTable isDashboard={true} />
+      
     </div>
   );
 };

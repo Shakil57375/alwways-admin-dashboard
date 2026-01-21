@@ -21,6 +21,7 @@ import Congratulations from "./pages/Authentication/Congratulations";
 import PreviewQuestion from "./components/Dashboard/Questionnarie/PreviewQuestion";
 import CouponCode from "./pages/Subscription/CouponCode";
 import AdminProfile from "./pages/Dashboard/Profile";
+import UserManagement from "./pages/Dashboard/UserManagement";
 
 function Routers() {
   const [loading, setLoading] = useState(true);
@@ -61,6 +62,15 @@ function Routers() {
             <>
               <PageTitle title={"alwways | Dashboard"} />
               <Dashboard />
+            </>
+          }
+        />
+        <Route
+          path="userManagement"
+          element={
+            <>
+              <PageTitle title="alwways | User Management" />
+              <UserManagement />
             </>
           }
         />

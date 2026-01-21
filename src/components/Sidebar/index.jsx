@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { NavLink, useLocation, useNavigate } from "react-router-dom"
-import { FiShoppingBag } from "react-icons/fi"
+import { FiShoppingBag, FiUsers } from "react-icons/fi"
 import { GoChecklist } from "react-icons/go"
 import { MdDashboard } from "react-icons/md"
 import { TiUserAddOutline } from "react-icons/ti"
@@ -114,6 +114,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   // Navigation items data
   const navItems = [
     { to: "/", icon: MdDashboard, label: "Dashboard" },
+    { to: "/userManagement", icon: FiUsers, label: "User Management" },
     { to: "/orderManagement", icon: FiShoppingBag, label: "Order Management" },
     { to: "/addQuestionnaire", icon: GoChecklist, label: "Add Questionnaire" },
     { to: "/makeAdmin", icon: TiUserAddOutline, label: "Make Admin" },

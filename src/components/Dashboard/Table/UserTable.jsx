@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import FilterBar from './FilterBar.jsx';
 import Table from './Table.jsx';
 import UserModal from '../../../pages/Modals/UserModal.jsx';
@@ -10,7 +10,7 @@ import {
 import { useGetAllOrdersQuery } from '../../../features/order/orderApi.js';
 import { toast } from 'react-hot-toast';
 
-const UserTable = ({ isDashboard, isOrderManagement }) => {
+const UserTable = ({ isDashboard, isOrderManagement, onDataUpdate }) => {
   const [search, setSearch] = useState('');
   const [subscription, setSubscription] = useState('');
   const [startDate, setStartDate] = useState(null);
@@ -65,6 +65,13 @@ const UserTable = ({ isDashboard, isOrderManagement }) => {
 
     return matchesSearch && matchesSubscription && matchesDate;
   });
+
+  // Update parent component with filtered data
+  useEffect(() => {
+    if (onDataUpdate) {
+      onDataUpdate(filteredData);
+    }
+  }, [filteredData, onDataUpdate]);
 
   const handleRowClick = (user) => {
     setSelectedUser(user); // Open the modal with selected user details
