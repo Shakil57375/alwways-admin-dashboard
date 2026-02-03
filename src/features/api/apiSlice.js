@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 const baseQuery = fetchBaseQuery({
-  baseUrl: 'https://tommy-vhs-introduce-columns.trycloudflare.com/api',
+  baseUrl: 'https://wrote-screensavers-carmen-myspace.trycloudflare.com/api',
   prepareHeaders: (headers, { getState }) => {
     // Try to get token from Redux state
     const token = getState().auth?.accessToken || null;
@@ -21,5 +21,5 @@ export const apiSlice = createApi({
   reducerPath: 'baseApi',
   baseQuery: baseQuery,
   tagTypes: ['user', 'Chats'],
-  endpoints: () => ({}), 
+  endpoints: () => ({}),
 });
