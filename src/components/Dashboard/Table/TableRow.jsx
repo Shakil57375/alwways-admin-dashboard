@@ -28,12 +28,12 @@ const TableRow = ({
             item.status === 'Active'
               ? 'text-green-500'
               : item.status === 'Blocked'
-              ? 'text-red-500'
-              : item.status === 'confirm'
-              ? 'text-green-500'
-              : item.status === 'cancel'
-              ? 'text-red-500'
-              : 'text-yellow-500'
+                ? 'text-red-500'
+                : item.status === 'confirm'
+                  ? 'text-green-500'
+                  : item.status === 'cancel'
+                    ? 'text-red-500'
+                    : 'text-yellow-500'
           }`}
         >
           {item?.status}
@@ -67,13 +67,13 @@ const TableRow = ({
               <FaTrash className="text-lg" />
             </button>
           )} */}
-            <button
-              className="text-gray-500 hover:text-red-500 transition-colors"
-              onClick={(e) => onDeleteClick(item, e)}
-              title="Delete User"
-            >
-              <FaTrash className="text-lg" />
-            </button>
+          <button
+            className="text-gray-500 hover:text-red-500 transition-colors"
+            onClick={(e) => onDeleteClick(item, e)}
+            title="Delete User"
+          >
+            <FaTrash className="text-lg" />
+          </button>
         </div>
       </td>
     </tr>

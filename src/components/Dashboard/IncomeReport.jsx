@@ -80,7 +80,9 @@ const IncomeReport = () => {
   return (
     <div className="p-4 bg-gray-100 rounded-lg">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Income Report</h2>
+        <h2 className="text-lg font-semibold">
+          Income Report (under construction)
+        </h2>
         <select
           value={selectedYear}
           onChange={handleYearChange}

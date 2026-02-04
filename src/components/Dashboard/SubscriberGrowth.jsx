@@ -79,7 +79,7 @@ const SubscriberGrowth = () => {
   return (
     <div className="p-4 bg-gray-100 rounded-lg">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Subscriber Growth</h2>
+        <h2 className="text-lg font-semibold">Subscriber Growth (under construction)</h2>
         <select
           value={selectedYear}
           onChange={handleYearChange}

@@ -1,21 +1,23 @@
-import { useState } from "react";
-import Modal from "../Modals/Modal";
-import ConfirmationModal from "../Modals/ConfirmationModal";
-import { RiDeleteBinLine } from "react-icons/ri";
-import { toast } from "react-hot-toast";
+import { useState } from 'react';
+import Modal from '../Modals/Modal';
+import ConfirmationModal from '../Modals/ConfirmationModal';
+import { RiDeleteBinLine } from 'react-icons/ri';
+import { toast } from 'react-hot-toast';
 import {
   useGetAllAdminsQuery,
   useCreateAdminMutation,
   useDeleteAdminMutation,
-} from "../../features/admin/adminApi";
+} from '../../features/admin/adminApi';
+import { useSelector } from 'react-redux';
 
 const MakeAdmin = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const user = useSelector((state) => state.auth.user);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [currentAdmin, setCurrentAdmin] = useState(null);
 
   // RTK Query hooks
@@ -26,7 +28,7 @@ const MakeAdmin = () => {
   // Handle Add New Admin
   const handleAddAdmin = async () => {
     if (!name || !lastName || !email || !password) {
-      toast.error("All fields are required.");
+      toast.error('All fields are required.');
       return;
     }
 
@@ -39,11 +41,11 @@ const MakeAdmin = () => {
         password,
       }).unwrap();
 
-      toast.success("Admin created successfully!");
+      toast.success('Admin created successfully!');
       setIsModalOpen(false);
       resetFields();
     } catch (error) {
-      toast.error(error.data?.message || "Failed to create admin");
+      toast.error(error.data?.message || 'Failed to create admin');
     }
   };
 
@@ -53,20 +55,20 @@ const MakeAdmin = () => {
 
     try {
       await deleteAdmin(currentAdmin._id).unwrap();
-      toast.success("Admin deleted successfully!");
+      toast.success('Admin deleted successfully!');
       setIsConfirmationOpen(false);
       setCurrentAdmin(null);
     } catch (error) {
-      toast.error(error.data?.message || "Failed to delete admin");
+      toast.error(error.data?.message || 'Failed to delete admin');
     }
   };
 
   // Reset input fields
   const resetFields = () => {
-    setName("");
-    setLastName("");
-    setEmail("");
-    setPassword("");
+    setName('');
+    setLastName('');
+    setEmail('');
+    setPassword('');
   };
 
   if (isLoading) {
@@ -110,17 +112,22 @@ const MakeAdmin = () => {
                 <td className="px-4 py-2">{admin.lastname}</td>
                 <td className="px-4 py-2">{admin.email}</td>
                 <td className="px-4 py-2 text-green-600">{admin.role}</td>
-                <td className="px-4 py-2 text-center">
-                  <button
-                    onClick={() => {
-                      setCurrentAdmin(admin);
-                      setIsConfirmationOpen(true);
-                    }}
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    <RiDeleteBinLine className="text-xl" />
-                  </button>
-                </td>
+                {
+                  // don't show delete button for admin.gmail.com
+                  admin?.email === 'admin@gmail.com' ? null : (
+                    <td className="px-4 py-2 text-center">
+                      <button
+                        onClick={() => {
+                          setCurrentAdmin(admin);
+                          setIsConfirmationOpen(true);
+                        }}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <RiDeleteBinLine className="text-xl" />
+                      </button>
+                    </td>
+                  )
+                }
               </tr>
             ))}
           </tbody>
