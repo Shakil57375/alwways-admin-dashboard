@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 const baseQuery = fetchBaseQuery({
-  baseUrl: 'https://wrote-screensavers-carmen-myspace.trycloudflare.com/api',
+  baseUrl: 'https://spyware-looked-abroad-attend.trycloudflare.com/api/',
   prepareHeaders: (headers, { getState }) => {
     // Try to get token from Redux state
     const token = getState().auth?.accessToken || null;
