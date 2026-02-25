@@ -56,6 +56,10 @@ export const userApi = apiSlice.injectEndpoints({
       }),
     }),
 
+    getUserGrowth: builder.query({
+      query: (year) => `user/users-statics/${year}`,
+    }),
+
     // Delete user
     deleteUser: builder.mutation({
       query: (userId) => ({
@@ -70,6 +74,7 @@ export const userApi = apiSlice.injectEndpoints({
 export const {
   useGetAllUsersQuery,
   useGetUserProfileQuery,
+  useGetUserGrowthQuery,
   useUpdateAdminProfileMutation,
   useChangePasswordMutation,
   useDeleteUserMutation,

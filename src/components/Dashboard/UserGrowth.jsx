@@ -10,88 +10,42 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from 'recharts';
+import { useGetUserGrowthQuery } from '../../features/user/userApi';
 
 const UserGrowth = () => {
   const [selectedYear, setSelectedYear] = useState('2026');
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [availableYears, setAvailableYears] = useState([]);
-
-  // Fetch user growth data from API
-  const fetchUserGrowthData = async (year) => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Get auth token from localStorage
-      const authData = JSON.parse(localStorage.getItem('auth'));
-      const token = authData?.access || '';
-
-      const response = await fetch(
-        `https://wrote-screensavers-carmen-myspace.trycloudflare.com/api/user/users-statics/${year}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch data: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-
-      // Transform API response to chart data format
-      if (result.data && Array.isArray(result.data)) {
-        const transformedData = result.data.map((item) => ({
-          month: item.month,
-          users: item.users,
-        }));
-        setData(transformedData);
-      } else {
-        setData([]);
-      }
-    } catch (err) {
-      setError(err.message);
-      console.error('Error fetching user growth data:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch available years on component mount
-  useEffect(() => {
-    const fetchAvailableYears = async () => {
-      try {
-        // You can fetch available years from an endpoint or hardcode them
-        // For now, we'll use a range of years
-        const currentYear = new Date().getFullYear();
-        const years = [];
-        for (let i = currentYear; i >= currentYear - 5; i--) {
-          years.push(i.toString());
-        }
-        setAvailableYears(years);
-      } catch (err) {
-        console.error('Error fetching available years:', err);
-        setAvailableYears(['2026', '2025', '2024', '2023', '2022', '2021']);
-      }
-    };
-
-    fetchAvailableYears();
-  }, []);
-
-  // Fetch data when year changes
-  useEffect(() => {
-    fetchUserGrowthData(selectedYear);
-  }, [selectedYear]);
+  const {
+    data: growthData,
+    isLoading: isGrowthLoading,
+    error: growthError,
+  } = useGetUserGrowthQuery(selectedYear);
 
   const handleYearChange = (event) => {
     setSelectedYear(event.target.value);
   };
+
+  useEffect(() => {
+    // Generate available years from 2020 to current year
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let year = 2020; year <= currentYear; year++) {
+      years.push(year.toString());
+    }
+    setAvailableYears(years);
+  }, []);
+
+  // Transform API response to chart data format
+  useEffect(() => {
+    if (growthData?.data && Array.isArray(growthData.data)) {
+      const transformedData = growthData.data.map((item) => ({
+        month: item.month,
+        users: item.users,
+      }));
+      setData(transformedData);
+    }
+  }, [growthData]);
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
@@ -110,13 +64,13 @@ const UserGrowth = () => {
         </select>
       </div>
 
-      {error && (
+      {growthError && (
         <div className="p-4 mb-4 bg-red-100 border border-red-400 text-red-700 rounded">
-          Error loading data: {error}
+          Error loading data: {growthError.message || 'Unknown error'}
         </div>
       )}
 
-      {loading ? (
+      {isGrowthLoading ? (
         <div className="flex items-center justify-center h-80">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
         </div>
