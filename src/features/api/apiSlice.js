@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 const baseQuery = fetchBaseQuery({
-  baseUrl: 'https://ratios-citizens-particles-providers.trycloudflare.com/api/',
+  baseUrl: 'http://165.227.90.194:5000/api/',
   prepareHeaders: (headers, { getState }) => {
     // Try to get token from Redux state
     const token = getState().auth?.accessToken || null;
